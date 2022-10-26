@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: "game-shop"
+
+  r2dbc:
+    driver-class-name: org.postgresql.Driver
+    url: r2dbc:postgresql://localhost:5432/game_shop
+
+  flyway:
+    enabled: true
+    out-of-order: false
+    sql-migration-prefix: "V"
+    url: jdbc:postgresql://localhost:5432/game_shop
