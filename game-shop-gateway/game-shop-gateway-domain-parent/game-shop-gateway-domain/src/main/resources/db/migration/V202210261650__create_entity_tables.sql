@@ -24,8 +24,6 @@ CREATE TABLE orders
     id                   UUID                     NOT NULL DEFAULT gen_random_uuid(),
     user_id              UUID                     NOT NULL,
     game_id              UUID                     NOT NULL,
-
-    game_last_updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
     created_at           TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
 
     PRIMARY KEY (id)
@@ -42,7 +40,7 @@ ALTER TABLE prices
 
 ALTER TABLE orders
     ADD CONSTRAINT "fk_orders_game_id_games"
-        FOREIGN KEY (game_id, game_last_updated_at)
+        FOREIGN KEY (game_id)
             REFERENCES games (id),
     ADD CONSTRAINT "unique_orders_user_id_game_id"
         UNIQUE (user_id, game_id);
