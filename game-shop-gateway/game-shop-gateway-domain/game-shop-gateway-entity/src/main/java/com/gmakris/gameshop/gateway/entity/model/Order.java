@@ -11,5 +11,5 @@ public record Order(
     UUID userId,
     UUID gameId,
     Date createdAt
-) {
+) implements GenericEntity {
 }

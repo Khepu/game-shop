@@ -13,5 +13,5 @@ public record Game(
     Date createdAt,
     Date updatedAt,
     BigDecimal price
-) {
+) implements GenericEntity {
 }
