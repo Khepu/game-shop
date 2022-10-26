@@ -9,4 +9,21 @@
     </parent>
 
     <artifactId>game-shop-gateway-core</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.gmakris</groupId>
+            <artifactId>game-shop-gateway-domain</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.gmakris</groupId>
+            <artifactId>game-shop-gateway-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+
+    </dependencies>
 </project>
