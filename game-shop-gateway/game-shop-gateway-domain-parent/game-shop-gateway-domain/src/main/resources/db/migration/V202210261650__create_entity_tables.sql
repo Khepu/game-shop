@@ -46,7 +46,8 @@ ALTER TABLE orders
     ADD CONSTRAINT "unique_orders_user_id_game_id"
         UNIQUE (user_id, game_id);
 
-CREATE INDEX "idx_gin_games_name" on games USING gin (name_embeddings);
+CREATE INDEX "idx_btree_games_created_at" ON games (created_at);
+CREATE INDEX "idx_gin_games_name" ON games USING gin (name_embeddings);
 
 CREATE INDEX "idx_btree_prices_game_id" ON prices (game_id);
 CREATE UNIQUE INDEX "idx_btree_prices_game_id_created_at" ON prices (game_id, created_at DESC);
