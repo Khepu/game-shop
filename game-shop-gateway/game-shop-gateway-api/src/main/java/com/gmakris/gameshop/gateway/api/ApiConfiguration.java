@@ -2,8 +2,7 @@ package com.gmakris.gameshop.gateway.api;
 
 import java.util.List;
 import com.gmakris.gameshop.gateway.api.controller.GenericController;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,11 +12,10 @@ import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
+@Slf4j
 @Configuration
 @EnableConfigurationProperties(ApiProperties.class)
 public class ApiConfiguration {
-
-    private final Logger log = LoggerFactory.getLogger(ApiConfiguration.class);
 
     @Bean("cors-filter")
     public CorsFilter corsFilter(final ApiProperties apiProperties) {
