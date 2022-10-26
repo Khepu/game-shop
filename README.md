@@ -4,16 +4,16 @@
 
 ```mermaid
 graph LR
-Gateway -- https --- Keycloak
+Gateway -- https:// --- Keycloak
 
-Keycloak --- KeycloakDB
+Keycloak --- KeycloakDB[(KeycloakDB)]
 
-CartManager -- rpc --- Gateway
-BackOffice -- rpc --- Gateway
+CartManager -- tcp:// --- Gateway
+BackOffice -- tcp:// --- Gateway
 
-BackOffice --- BackOfficeDB
-CartManager --- CartManagerDB
-Gateway --- GatewayDB
+BackOffice --- BackOfficeDB[(BackOfficeDB)]
+CartManager --- CartManagerDB[(CartManagerDB)]
+Gateway --- GatewayDB[(GatewayDB)]
 
 subgraph API
    Gateway
@@ -26,9 +26,10 @@ subgraph External
 end
 
 subgraph Storage
-   CartManagerDB
-   GatewayDB
-   BackOfficeDB
+   CartManagerDB[(CartManagerDB)]
+   GatewayDB[(GatewayDB)]
+   BackOfficeDB[(BackOfficeDB)]
+   KeycloakDB[(KeycloakDB)]
 end
 
 Intranet(Intranet) --- BackOffice
