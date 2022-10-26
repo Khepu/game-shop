@@ -2,9 +2,10 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TABLE games
 (
-    id         UUID                     NOT NULL DEFAULT gen_random_uuid(),
-    name       TEXT                     NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+    id              UUID                     NOT NULL DEFAULT gen_random_uuid(),
+    name            TEXT                     NOT NULL,
+    created_at      TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+    name_embeddings TSVECTOR                 NOT NULL GENERATED ALWAYS AS (to_tsvector('english', name)) STORED,
 
     PRIMARY KEY (id)
 );
@@ -44,6 +45,8 @@ ALTER TABLE orders
             REFERENCES games (id),
     ADD CONSTRAINT "unique_orders_user_id_game_id"
         UNIQUE (user_id, game_id);
+
+CREATE INDEX "idx_gin_games_name" on games USING gin (name_embeddings);
 
 CREATE INDEX "idx_btree_prices_game_id" ON prices (game_id);
 CREATE UNIQUE INDEX "idx_btree_prices_game_id_created_at" ON prices (game_id, created_at DESC);
