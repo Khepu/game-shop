@@ -23,7 +23,6 @@
         <module>game-shop-gateway-service</module>
         <module>game-shop-gateway-messaging</module>
         <module>game-shop-gateway-api</module>
-        <module>game-shop-gateway-dto</module>
     </modules>
 
     <properties>
@@ -76,11 +75,6 @@
             <dependency>
                 <groupId>com.gmakris</groupId>
                 <artifactId>game-shop-gateway-api</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.gmakris</groupId>
-                <artifactId>game-shop-gateway-dto</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
