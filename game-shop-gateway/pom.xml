@@ -23,10 +23,13 @@
         <module>game-shop-gateway-service</module>
         <module>game-shop-gateway-messaging</module>
         <module>game-shop-gateway-api</module>
+        <module>game-shop-gateway-dto</module>
     </modules>
 
     <properties>
         <java.version>17</java.version>
+
+        <game-shop-sdk.version>1.0-SNAPSHOT</game-shop-sdk.version>
 
         <spring-data-r2dbc.version>2.6.7</spring-data-r2dbc.version>
         <spring-webflux.version>2.7.5</spring-webflux.version>
@@ -74,6 +77,22 @@
                 <groupId>com.gmakris</groupId>
                 <artifactId>game-shop-gateway-api</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.gmakris</groupId>
+                <artifactId>game-shop-gateway-dto</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.gmakris</groupId>
+                <artifactId>game-shop-gateway-mapper</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.gmakris</groupId>
+                <artifactId>game-shop-sdk-dto</artifactId>
+                <version>${game-shop-sdk.version}</version>
             </dependency>
 
             <dependency>

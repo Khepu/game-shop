@@ -11,4 +11,15 @@
     </parent>
 
     <artifactId>game-shop-gateway-mapper</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.gmakris</groupId>
+            <artifactId>game-shop-gateway-entity</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.gmakris</groupId>
+            <artifactId>game-shop-gateway-dto</artifactId>
+        </dependency>
+    </dependencies>
 </project>
