@@ -1,7 +1,6 @@
 package com.gmakris.gameshop.gateway.service.crud;
 
 import com.gmakris.gameshop.gateway.entity.model.Game;
-import com.gmakris.gameshop.gateway.entity.projection.PricedGame;
 import com.gmakris.gameshop.gateway.repository.GameRepository;
 import org.reactivestreams.Publisher;
 import org.springframework.stereotype.Service;
@@ -17,7 +16,12 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public Flux<PricedGame> findPricedGamesByQuery(
+    public Flux<Game> findAllPaginated(final int page, final int size) {
+        return repository.findAllPaginated((page - 1) * size, size);
+    }
+
+    @Override
+    public Flux<Game> findPricedGamesByQuery(
         final String query,
         final int limit
     ) {
