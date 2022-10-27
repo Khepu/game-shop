@@ -5,6 +5,7 @@ import static java.lang.Math.min;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
+import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 import com.gmakris.gameshop.gateway.api.ApiProperties;
@@ -102,6 +103,7 @@ public class GameController implements GenericController {
 
     @Override
     public RouterFunction<ServerResponse> routes() {
-        return route(GET("/games"), this::findAllPaginated);
+        return route(GET("/games"), this::findAllPaginated)
+            .and(route(POST("/games"), this::search));
     }
 }
