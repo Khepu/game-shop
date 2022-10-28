@@ -59,14 +59,14 @@ public class GameController implements GenericController {
 
     private Mono<ServerResponse> findAllPaginated(final ServerRequest serverRequest) {
         return Mono.zip(
-                ParseUtil.toInteger(serverRequest.queryParam("size"))
-                    .doOnError(throwable -> log.error("Error parsing page size!"))
-                    .onErrorMap(throwable -> new RuntimeException("Could not parse query parameter 'size'!"))
-                    .map(size -> min(apiProperties.getMaxPageSize(), size)),
                 ParseUtil.toInteger(serverRequest.queryParam("page"))
                     .doOnError(throwable -> log.error("Error parsing page number!"))
                     .onErrorMap(throwable -> new RuntimeException("Could not parse query parameter 'page'!"))
-                    .map(page -> max(FIRST_PAGE, page)))
+                    .map(page -> max(FIRST_PAGE, page)),
+                ParseUtil.toInteger(serverRequest.queryParam("size"))
+                    .doOnError(throwable -> log.error("Error parsing page size!"))
+                    .onErrorMap(throwable -> new RuntimeException("Could not parse query parameter 'size'!"))
+                    .map(size -> min(apiProperties.getMaxPageSize(), size)))
             .flatMapMany(pageAndSize -> gameService.findAllPaginated(
                 pageAndSize.getT1(),
                 pageAndSize.getT2()))
@@ -93,7 +93,7 @@ public class GameController implements GenericController {
                 .ok()
                 .contentType(APPLICATION_JSON)
                 .bodyValue(pricedGames))
-            .doOnError(throwable -> log.error("Error while searching for games by query!"))
+            .doOnError(throwable -> log.error("Error while searching for games by query!", throwable))
             .onErrorMap(throwable -> new RuntimeException("Invalid query!"))
             .onErrorResume(throwable -> ServerResponse
                 .status(INTERNAL_SERVER_ERROR)
