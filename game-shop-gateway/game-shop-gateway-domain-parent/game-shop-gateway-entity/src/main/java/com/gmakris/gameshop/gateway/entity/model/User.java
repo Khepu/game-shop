@@ -13,4 +13,13 @@ public record User(
     LocalDateTime createdAt,
     boolean enabled
 ) implements GenericEntity {
+
+    public User withHashedPassword(final String hashedPassword) {
+        return new User(
+            id,
+            username,
+            hashedPassword,
+            createdAt,
+            enabled);
+    }
 }
