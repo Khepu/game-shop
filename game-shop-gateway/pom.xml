@@ -30,7 +30,7 @@
 
         <game-shop-sdk.version>1.0-SNAPSHOT</game-shop-sdk.version>
 
-        <spring-data-r2dbc.version>2.6.7</spring-data-r2dbc.version>
+        <spring-data-r2dbc.version>2.7.5</spring-data-r2dbc.version>
         <spring-webflux.version>2.7.5</spring-webflux.version>
         <postgres.version>42.5.0</postgres.version>
         <r2dbc-postgres.version>0.9.2.RELEASE</r2dbc-postgres.version>
