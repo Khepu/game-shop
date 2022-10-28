@@ -40,10 +40,9 @@ public class UserController implements GenericController {
                     throwable))
                 .onErrorMap(throwable -> new RuntimeException(
                     "User with username " + user.username() + " already exists!")))
-            .flatMap(user -> ServerResponse
+            .flatMap(__ -> ServerResponse
                 .ok()
-                .contentType(APPLICATION_JSON)
-                .bodyValue(user))
+                .build())
             .onErrorResume(throwable -> ServerResponse
                 .status(INTERNAL_SERVER_ERROR)
                 .bodyValue(throwable.getMessage()));
