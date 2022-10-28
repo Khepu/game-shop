@@ -19,7 +19,11 @@ public class ApiSecurityConfiguration {
     public SecurityWebFilterChain securityWebFilterChain(
         final ServerHttpSecurity http
     ) {
-        return http.authorizeExchange()
+        return http
+            .csrf().disable()
+            .authorizeExchange()
+            .pathMatchers("/auth/register")
+            .permitAll()
             .anyExchange().authenticated()
             .and()
             .build();
