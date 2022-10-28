@@ -1,7 +1,7 @@
 package com.gmakris.gameshop.gateway.entity.model;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.UUID;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
@@ -10,7 +10,7 @@ import org.springframework.data.relational.core.mapping.Table;
 public record Price(
     @Id UUID id,
     UUID gameId,
-    Date createdAt,
+    LocalDateTime createdAt,
     BigDecimal value
 ) implements GenericEntity {
 }
