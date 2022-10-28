@@ -15,7 +15,7 @@ public interface PriceRepository extends GenericRepository<Price> {
     from prices p
         inner join games g on g.id = p.game_id
     where g.id = :id
-    order by created_at
+    order by p.created_at
     limit 1
     """)
     Mono<Price> findMostRecentPriceByGameId(@Param("id") UUID id);
