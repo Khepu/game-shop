@@ -11,3 +11,9 @@ spring:
     out-of-order: false
     sql-migration-prefix: "V"
     url: jdbc:postgresql://localhost:5432/game_shop
+
+api:
+  allowed-origins:
+    - "*"
+  allowed-headers:
+    - "*"
