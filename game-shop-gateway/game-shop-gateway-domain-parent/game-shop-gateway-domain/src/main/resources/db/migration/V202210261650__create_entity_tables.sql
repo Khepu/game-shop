@@ -30,6 +30,17 @@ CREATE TABLE orders
     PRIMARY KEY (id)
 );
 
+CREATE TABLE users
+(
+    id         UUID                     NOT NULL DEFAULT gen_random_uuid(),
+    username   TEXT                     NOT NULL,
+    password   TEXT                     NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+    enabled    BOOLEAN                  NOT NULL,
+
+    PRIMARY KEY (id)
+);
+
 ALTER TABLE prices
     ADD CONSTRAINT "fk_prices_game_id_games"
         FOREIGN KEY (game_id)
@@ -40,11 +51,18 @@ ALTER TABLE prices
         CHECK ( value >= 0 );
 
 ALTER TABLE orders
+    ADD CONSTRAINT "fk_orders_users_id_users"
+        FOREIGN KEY (user_id)
+            REFERENCES users (id),
     ADD CONSTRAINT "fk_orders_game_id_games"
         FOREIGN KEY (game_id)
             REFERENCES games (id),
     ADD CONSTRAINT "unique_orders_user_id_game_id"
         UNIQUE (user_id, game_id);
+
+ALTER TABLE users
+    ADD CONSTRAINT "unique_users_username"
+        UNIQUE (username);
 
 CREATE INDEX "idx_btree_games_created_at" ON games (created_at);
 CREATE INDEX "idx_gin_games_name" ON games USING gin (name_embeddings);
