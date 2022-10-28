@@ -3,6 +3,7 @@ package com.gmakris.gameshop.gateway.service.auth;
 import java.util.List;
 import com.gmakris.gameshop.gateway.entity.model.User;
 import com.gmakris.gameshop.gateway.repository.UserRepository;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,6 @@ public class UserServiceImpl implements UserService, ReactiveUserDetailsService 
             .map(user -> new org.springframework.security.core.userdetails.User(
                 user.username(),
                 user.password(),
-                List.of()));
+                List.of(new SimpleGrantedAuthority("USER"))));
     }
 }
