@@ -2,41 +2,41 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TABLE games
 (
-    id              UUID                     NOT NULL DEFAULT gen_random_uuid(),
-    name            TEXT                     NOT NULL,
-    created_at      TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
-    name_embeddings TSVECTOR                 NOT NULL GENERATED ALWAYS AS (to_tsvector('english', name)) STORED,
+    id              UUID                        NOT NULL DEFAULT gen_random_uuid(),
+    name            TEXT                        NOT NULL,
+    created_at      TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now(),
+    name_embeddings TSVECTOR                    NOT NULL GENERATED ALWAYS AS (to_tsvector('english', name)) STORED,
 
     PRIMARY KEY (id)
 );
 
 CREATE TABLE prices
 (
-    id         UUID                     NOT NULL DEFAULT gen_random_uuid(),
-    game_id    UUID                     NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
-    value      DECIMAL                  NOT NULL,
+    id         UUID                        NOT NULL DEFAULT gen_random_uuid(),
+    game_id    UUID                        NOT NULL,
+    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now(),
+    value      DECIMAL                     NOT NULL,
 
     PRIMARY KEY (id)
 );
 
 CREATE TABLE orders
 (
-    id                   UUID                     NOT NULL DEFAULT gen_random_uuid(),
-    user_id              UUID                     NOT NULL,
-    game_id              UUID                     NOT NULL,
-    created_at           TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+    id         UUID                        NOT NULL DEFAULT gen_random_uuid(),
+    user_id    UUID                        NOT NULL,
+    game_id    UUID                        NOT NULL,
+    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now(),
 
     PRIMARY KEY (id)
 );
 
 CREATE TABLE users
 (
-    id         UUID                     NOT NULL DEFAULT gen_random_uuid(),
-    username   TEXT                     NOT NULL,
-    password   TEXT                     NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
-    enabled    BOOLEAN                  NOT NULL,
+    id         UUID                        NOT NULL DEFAULT gen_random_uuid(),
+    username   TEXT                        NOT NULL,
+    password   TEXT                        NOT NULL,
+    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now(),
+    enabled    BOOLEAN                     NOT NULL,
 
     PRIMARY KEY (id)
 );
