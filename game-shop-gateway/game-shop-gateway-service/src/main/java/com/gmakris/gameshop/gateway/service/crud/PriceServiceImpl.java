@@ -7,6 +7,7 @@ import org.reactivestreams.Publisher;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
 
 @Service
 public class PriceServiceImpl implements PriceService {
@@ -15,6 +16,12 @@ public class PriceServiceImpl implements PriceService {
 
     public PriceServiceImpl(final PriceRepository repository) {
         this.repository = repository;
+    }
+
+    @Override
+    public Mono<Tuple2<Price, Game>> toPricedGame(final Game game) {
+        return findMostRecentPriceByGame(game)
+            .zipWith(Mono.just(game));
     }
 
     @Override

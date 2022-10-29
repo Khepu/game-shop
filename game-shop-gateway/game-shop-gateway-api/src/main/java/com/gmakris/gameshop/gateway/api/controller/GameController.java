@@ -10,7 +10,6 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
 
 import com.gmakris.gameshop.gateway.api.ApiProperties;
 import com.gmakris.gameshop.gateway.api.util.ParseUtil;
-import com.gmakris.gameshop.gateway.entity.model.Game;
 import com.gmakris.gameshop.gateway.mapper.GameMapper;
 import com.gmakris.gameshop.gateway.mapper.PriceMapper;
 import com.gmakris.gameshop.gateway.service.crud.GameService;
@@ -49,14 +48,6 @@ public class GameController implements GenericController {
         this.apiProperties = apiProperties;
     }
 
-    private Mono<PricedGameDto> toPricedGame(final Game game) {
-        return priceService.findMostRecentPriceByGame(game)
-            .zipWith(Mono.just(game))
-            .map(priceAndGame -> new PricedGameDto(
-                gameMapper.to(priceAndGame.getT2()),
-                priceMapper.to(priceAndGame.getT1())));
-    }
-
     private Mono<ServerResponse> findAllPaginated(final ServerRequest serverRequest) {
         return Mono.zip(
                 ParseUtil.toInteger(serverRequest.queryParam("page"))
@@ -70,7 +61,10 @@ public class GameController implements GenericController {
             .flatMapMany(pageAndSize -> gameService.findAllPaginated(
                 pageAndSize.getT1(),
                 pageAndSize.getT2()))
-            .flatMap(this::toPricedGame)
+            .flatMap(priceService::toPricedGame)
+            .map(priceAndGame -> new PricedGameDto(
+                gameMapper.to(priceAndGame.getT2()),
+                priceMapper.to(priceAndGame.getT1())))
             .collectList()
             .flatMap(pricedGames -> ServerResponse
                 .ok()
@@ -87,7 +81,10 @@ public class GameController implements GenericController {
             .flatMapMany(query -> gameService.findPricedGamesByQuery(
                 query,
                 apiProperties.getDefaultPageSize()))
-            .flatMap(this::toPricedGame)
+            .flatMap(priceService::toPricedGame)
+            .map(priceAndGame -> new PricedGameDto(
+                gameMapper.to(priceAndGame.getT2()),
+                priceMapper.to(priceAndGame.getT1())))
             .collectList()
             .flatMap(pricedGames -> ServerResponse
                 .ok()
