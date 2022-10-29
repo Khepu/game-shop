@@ -1,10 +1,12 @@
 package com.gmakris.gameshop.gateway.service.crud;
 
+import java.util.UUID;
 import com.gmakris.gameshop.gateway.entity.model.Game;
 import com.gmakris.gameshop.gateway.repository.GameRepository;
 import org.reactivestreams.Publisher;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Service
 public class GameServiceImpl implements GameService {
@@ -13,6 +15,11 @@ public class GameServiceImpl implements GameService {
 
     public GameServiceImpl(final GameRepository repository) {
         this.repository = repository;
+    }
+
+    @Override
+    public Mono<Game> findById(final UUID gameId) {
+        return repository.findById(gameId);
     }
 
     @Override
