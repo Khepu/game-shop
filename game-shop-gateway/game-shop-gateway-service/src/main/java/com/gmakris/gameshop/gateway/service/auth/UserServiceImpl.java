@@ -24,6 +24,11 @@ public class UserServiceImpl implements UserService, ReactiveUserDetailsService 
     }
 
     @Override
+    public Mono<User> findOne(final String username) {
+        return repository.findFirstByUsername(username);
+    }
+
+    @Override
     public Mono<UserDetails> findByUsername(final String username) {
         return repository.findFirstByUsername(username)
             .map(user -> new org.springframework.security.core.userdetails.User(
