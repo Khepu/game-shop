@@ -8,7 +8,6 @@ import static org.springframework.web.reactive.function.server.RequestPredicates
 import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
-import java.security.Principal;
 import java.util.UUID;
 import com.gmakris.gameshop.gateway.entity.model.CartItem;
 import com.gmakris.gameshop.gateway.entity.model.CartItemOperation;
@@ -25,9 +24,8 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 
 @Component
-public class CartItemController implements GenericController {
+public class CartItemController extends AuthenticatedController implements GenericController {
 
-    private final UserService userService;
     private final GameMapper gameMapper;
     private final PriceMapper priceMapper;
     private final PriceService priceService;
@@ -40,18 +38,12 @@ public class CartItemController implements GenericController {
         final PriceService priceService,
         final CartItemService cartItemService
     ) {
-        this.userService = userService;
+        super(userService);
+
         this.gameMapper = gameMapper;
         this.priceMapper = priceMapper;
         this.priceService = priceService;
         this.cartItemService = cartItemService;
-    }
-
-    private Mono<UUID> getUserId(final ServerRequest serverRequest) {
-        return serverRequest.principal()
-            .map(Principal::getName)
-            .flatMap(userService::findOne)
-            .map(com.gmakris.gameshop.gateway.entity.model.User::id);
     }
 
     private Mono<ServerResponse> showCart(final ServerRequest serverRequest) {
