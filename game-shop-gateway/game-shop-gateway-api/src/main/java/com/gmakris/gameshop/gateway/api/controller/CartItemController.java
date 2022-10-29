@@ -1,0 +1,112 @@
+package com.gmakris.gameshop.gateway.api.controller;
+
+import static com.gmakris.gameshop.gateway.entity.model.CartItemOperation.ADD;
+import static com.gmakris.gameshop.gateway.entity.model.CartItemOperation.REMOVE;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
+import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
+import static org.springframework.web.reactive.function.server.RouterFunctions.route;
+
+import java.security.Principal;
+import java.util.UUID;
+import com.gmakris.gameshop.gateway.entity.model.CartItem;
+import com.gmakris.gameshop.gateway.entity.model.CartItemOperation;
+import com.gmakris.gameshop.gateway.mapper.GameMapper;
+import com.gmakris.gameshop.gateway.mapper.PriceMapper;
+import com.gmakris.gameshop.gateway.service.auth.UserService;
+import com.gmakris.gameshop.gateway.service.crud.CartItemService;
+import com.gmakris.gameshop.gateway.service.crud.PriceService;
+import com.gmakris.gameshop.sdk.dto.PricedGameDto;
+import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.server.RouterFunction;
+import org.springframework.web.reactive.function.server.ServerRequest;
+import org.springframework.web.reactive.function.server.ServerResponse;
+import reactor.core.publisher.Mono;
+
+@Component
+public class CartItemController implements GenericController {
+
+    private final UserService userService;
+    private final GameMapper gameMapper;
+    private final PriceMapper priceMapper;
+    private final PriceService priceService;
+    private final CartItemService cartItemService;
+
+    public CartItemController(
+        final UserService userService,
+        final GameMapper gameMapper,
+        final PriceMapper priceMapper,
+        final PriceService priceService,
+        final CartItemService cartItemService
+    ) {
+        this.userService = userService;
+        this.gameMapper = gameMapper;
+        this.priceMapper = priceMapper;
+        this.priceService = priceService;
+        this.cartItemService = cartItemService;
+    }
+
+    private Mono<UUID> getUserId(final ServerRequest serverRequest) {
+        return serverRequest.principal()
+            .map(Principal::getName)
+            .flatMap(userService::findOne)
+            .map(com.gmakris.gameshop.gateway.entity.model.User::id);
+    }
+
+    private Mono<ServerResponse> showCart(final ServerRequest serverRequest) {
+        return getUserId(serverRequest)
+            .flatMapMany(cartItemService::findCartGames)
+            .flatMap(priceService::toPricedGame)
+            .map(priceAndGame -> new PricedGameDto(
+                gameMapper.to(priceAndGame.getT2()),
+                priceMapper.to(priceAndGame.getT1())))
+            .collectList()
+            .flatMap(pricedGames -> ServerResponse
+                .ok()
+                .contentType(APPLICATION_JSON)
+                .bodyValue(pricedGames))
+            .onErrorResume(throwable -> ServerResponse
+                .status(INTERNAL_SERVER_ERROR)
+                .contentType(APPLICATION_JSON)
+                .bodyValue(throwable.getMessage()));
+    }
+
+    private Mono<ServerResponse> addCartItem(
+        final ServerRequest serverRequest,
+        final CartItemOperation cartItemOperation
+    ) {
+        return getUserId(serverRequest)
+            .flatMap(userId -> Mono.fromCallable(() ->
+                    UUID.fromString(serverRequest.pathVariable("gameId")))
+                .map(gameId -> new CartItem(
+                    null,
+                    gameId,
+                    userId,
+                    null,
+                    cartItemOperation)))
+            .flatMap(cartItemService::save)
+            .flatMap(__ -> ServerResponse
+                .ok()
+                .build())
+            .onErrorResume(throwable -> ServerResponse
+                .status(INTERNAL_SERVER_ERROR)
+                .contentType(APPLICATION_JSON)
+                .bodyValue(throwable.getMessage()));
+    }
+
+    private Mono<ServerResponse> addToCart(final ServerRequest serverRequest) {
+        return addCartItem(serverRequest, ADD);
+    }
+
+    private Mono<ServerResponse> removeFromCart(final ServerRequest serverRequest) {
+        return addCartItem(serverRequest, REMOVE);
+    }
+
+    @Override
+    public RouterFunction<ServerResponse> routes() {
+        return route(GET("/cart"), this::showCart)
+            .and(route(POST("/cart/{gameId}/add"), this::addToCart))
+            .and(route(POST("/cart/{gameId}/remove"), this::removeFromCart));
+    }
+}
