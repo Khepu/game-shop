@@ -11,12 +11,10 @@ import reactor.core.publisher.Mono;
 public interface PriceRepository extends GenericRepository<Price> {
 
     @Query("""
-    select *
-    from prices p
-        inner join games g on g.id = p.game_id
-    where g.id = :id
-    order by p.created_at
-    limit 1
+    select distinct on (game_id) *
+    from prices
+    where game_id = :id
+    order by game_id, created_at desc
     """)
     Mono<Price> findMostRecentPriceByGameId(@Param("id") UUID id);
 }
