@@ -3,18 +3,23 @@ package com.gmakris.gameshop.gateway.service.crud;
 import java.util.UUID;
 import com.gmakris.gameshop.gateway.entity.model.Game;
 import com.gmakris.gameshop.gateway.repository.GameRepository;
-import org.reactivestreams.Publisher;
+import com.gmakris.gameshop.gateway.repository.GenericRepository;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
-public class GameServiceImpl implements GameService {
+public class GameServiceImpl extends AbstractCrudService<Game> implements GameService {
 
     private final GameRepository repository;
 
     public GameServiceImpl(final GameRepository repository) {
         this.repository = repository;
+    }
+
+    @Override
+    protected GenericRepository<Game> repository() {
+        return repository;
     }
 
     @Override
@@ -38,10 +43,5 @@ public class GameServiceImpl implements GameService {
         final int limit
     ) {
         return repository.findPricedGamesByQuery(query, limit);
-    }
-
-    @Override
-    public Flux<Game> saveAll(final Publisher<Game> gamePublisher) {
-        return repository.saveAll(gamePublisher);
     }
 }

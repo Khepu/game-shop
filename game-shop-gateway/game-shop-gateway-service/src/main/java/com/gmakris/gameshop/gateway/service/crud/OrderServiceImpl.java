@@ -1,13 +1,12 @@
 package com.gmakris.gameshop.gateway.service.crud;
 
 import com.gmakris.gameshop.gateway.entity.model.Order;
+import com.gmakris.gameshop.gateway.repository.GenericRepository;
 import com.gmakris.gameshop.gateway.repository.OrderRepository;
-import org.reactivestreams.Publisher;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
 
 @Service
-public class OrderServiceImpl implements OrderService {
+public class OrderServiceImpl extends AbstractCrudService<Order> implements OrderService {
 
     private final OrderRepository repository;
 
@@ -16,7 +15,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Flux<Order> saveAll(final Publisher<Order> orderPublisher) {
-        return repository.saveAll(orderPublisher);
+    protected GenericRepository<Order> repository() {
+        return repository;
     }
 }
