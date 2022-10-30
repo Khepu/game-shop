@@ -1,5 +1,6 @@
 package com.gmakris.gameshop.gateway.entity.model.auth;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 import com.gmakris.gameshop.gateway.entity.model.GenericEntity;
 import org.springframework.data.annotation.Id;
@@ -9,6 +10,7 @@ import org.springframework.data.relational.core.mapping.Table;
 public record UserRole(
     @Id UUID id,
     UUID userId,
-    UUID roleId
+    UUID roleId,
+    LocalDateTime createdAt
 ) implements GenericEntity {
 }

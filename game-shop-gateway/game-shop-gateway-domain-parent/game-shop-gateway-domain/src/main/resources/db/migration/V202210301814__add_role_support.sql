@@ -9,9 +9,10 @@ CREATE TABLE roles
 
 CREATE TABLE user_roles
 (
-    id      UUID NOT NULL DEFAULT gen_random_uuid(),
-    user_id UUID NOT NULL,
-    role_id UUID NOT NULL,
+    id         UUID                        NOT NULL DEFAULT gen_random_uuid(),
+    user_id    UUID                        NOT NULL,
+    role_id    UUID                        NOT NULL,
+    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now(),
 
     PRIMARY KEY (id)
 );
