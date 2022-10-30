@@ -12,6 +12,7 @@ import com.gmakris.gameshop.gateway.api.ApiProperties;
 import com.gmakris.gameshop.gateway.api.util.ParseUtil;
 import com.gmakris.gameshop.gateway.mapper.GameMapper;
 import com.gmakris.gameshop.gateway.mapper.PriceMapper;
+import com.gmakris.gameshop.gateway.service.auth.UserService;
 import com.gmakris.gameshop.gateway.service.crud.GameService;
 import com.gmakris.gameshop.gateway.service.crud.PriceService;
 import com.gmakris.gameshop.sdk.dto.PricedGameDto;
@@ -24,7 +25,7 @@ import reactor.core.publisher.Mono;
 
 @Slf4j
 @Component
-public class GameController implements GenericController {
+public class GameController extends AuthenticatedController implements GenericController {
 
     private static final int FIRST_PAGE = 1;
 
@@ -37,15 +38,33 @@ public class GameController implements GenericController {
     public GameController(
         final GameMapper gameMapper,
         final PriceMapper priceMapper,
+        final UserService userService,
         final GameService gameService,
         final PriceService priceService,
         final ApiProperties apiProperties
     ) {
+        super(userService);
+
         this.gameMapper = gameMapper;
         this.priceMapper = priceMapper;
         this.gameService = gameService;
         this.priceService = priceService;
         this.apiProperties = apiProperties;
+    }
+
+    private Mono<ServerResponse> findAllOwned(final ServerRequest serverRequest) {
+        return getUserId(serverRequest)
+            .flatMapMany(gameService::findAllOwnedByUserId)
+            .map(gameMapper::to)
+            .collectList()
+            .flatMap(games -> ServerResponse
+                .ok()
+                .contentType(APPLICATION_JSON)
+                .bodyValue(games))
+            .onErrorResume(throwable -> ServerResponse
+                .status(INTERNAL_SERVER_ERROR)
+                .contentType(APPLICATION_JSON)
+                .bodyValue(throwable.getMessage()));
     }
 
     private Mono<ServerResponse> findAllPaginated(final ServerRequest serverRequest) {
@@ -100,7 +119,8 @@ public class GameController implements GenericController {
 
     @Override
     public RouterFunction<ServerResponse> routes() {
-        return route(GET("/games"), this::findAllPaginated)
-            .and(route(POST("/games"), this::search));
+        return route(GET("/games/all"), this::findAllPaginated)
+            .and(route(POST("/games/all"), this::search))
+            .and(route(GET("/games/owned"), this::findAllOwned));
     }
 }

@@ -9,6 +9,8 @@ import reactor.core.publisher.Mono;
 public interface GameService {
     Mono<Game> findById(UUID gameId);
 
+    Flux<Game> findAllOwnedByUserId(UUID userId);
+
     Flux<Game> findAllPaginated(int page, int size);
 
     Flux<Game> findPricedGamesByQuery(String query, int limit);

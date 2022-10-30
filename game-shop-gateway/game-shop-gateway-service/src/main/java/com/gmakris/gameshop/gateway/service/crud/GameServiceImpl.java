@@ -23,6 +23,11 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
+    public Flux<Game> findAllOwnedByUserId(final UUID userId) {
+        return repository.findAllOwnedByUserId(userId);
+    }
+
+    @Override
     public Flux<Game> findAllPaginated(final int page, final int size) {
         return repository.findAllPaginated((page - 1) * size, size);
     }

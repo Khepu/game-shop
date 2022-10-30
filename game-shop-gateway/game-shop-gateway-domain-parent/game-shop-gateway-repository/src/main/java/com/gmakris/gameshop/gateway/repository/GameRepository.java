@@ -1,5 +1,6 @@
 package com.gmakris.gameshop.gateway.repository;
 
+import java.util.UUID;
 import com.gmakris.gameshop.gateway.entity.model.Game;
 import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -29,4 +30,12 @@ public interface GameRepository extends GenericRepository<Game> {
     Flux<Game> findPricedGamesByQuery(
         @Param("query") String query,
         @Param("limit") int limit);
+
+    @Query("""
+    select g.id, g.name, g.created_at
+    from games g
+        inner join orders o on o.game_id = g.id
+    where o.user_id = :userId
+    """)
+    Flux<Game> findAllOwnedByUserId(@Param("userId")UUID userId);
 }
