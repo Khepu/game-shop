@@ -65,6 +65,6 @@ public class OrderController extends AuthenticatedController implements GenericC
 
     @Override
     public RouterFunction<ServerResponse> routes() {
-        return route(POST("/order"), this::finalizeOrder);
+        return route(POST("/orders"), this::finalizeOrder);
     }
 }
