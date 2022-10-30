@@ -30,7 +30,7 @@ public class UserServiceImpl implements UserService, ReactiveUserDetailsService 
     public Mono<User> save(final User user) {
         return repository.save(user)
             .flatMap(persistedUser -> roleService.findByName("USER")
-                .map(role -> new UserRole(null, user.id(), role.id()))
+                .map(role -> new UserRole(null, user.id(), role.id(), null))
                 .flatMap(userRoleService::save)
                 .thenReturn(persistedUser));
     }
