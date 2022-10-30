@@ -8,7 +8,7 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
 
 import com.gmakris.gameshop.gateway.entity.model.CartItem;
 import com.gmakris.gameshop.gateway.entity.model.Order;
-import com.gmakris.gameshop.gateway.service.auth.UserService;
+import com.gmakris.gameshop.gateway.service.crud.auth.UserService;
 import com.gmakris.gameshop.gateway.service.crud.CartItemService;
 import com.gmakris.gameshop.gateway.service.crud.OrderService;
 import org.springframework.stereotype.Component;

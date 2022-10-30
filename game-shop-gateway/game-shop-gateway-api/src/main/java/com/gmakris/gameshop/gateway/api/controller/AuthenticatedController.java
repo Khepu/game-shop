@@ -3,7 +3,7 @@ package com.gmakris.gameshop.gateway.api.controller;
 import java.security.Principal;
 import java.util.UUID;
 import com.gmakris.gameshop.gateway.entity.model.auth.User;
-import com.gmakris.gameshop.gateway.service.auth.UserService;
+import com.gmakris.gameshop.gateway.service.crud.auth.UserService;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import reactor.core.publisher.Mono;
 

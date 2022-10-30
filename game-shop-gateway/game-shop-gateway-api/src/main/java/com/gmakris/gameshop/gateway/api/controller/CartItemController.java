@@ -14,7 +14,7 @@ import com.gmakris.gameshop.gateway.entity.model.CartItem;
 import com.gmakris.gameshop.gateway.entity.model.CartItemOperation;
 import com.gmakris.gameshop.gateway.mapper.GameMapper;
 import com.gmakris.gameshop.gateway.mapper.PriceMapper;
-import com.gmakris.gameshop.gateway.service.auth.UserService;
+import com.gmakris.gameshop.gateway.service.crud.auth.UserService;
 import com.gmakris.gameshop.gateway.service.crud.CartItemService;
 import com.gmakris.gameshop.gateway.service.crud.PriceService;
 import com.gmakris.gameshop.sdk.dto.PricedGameDto;

@@ -1,4 +1,4 @@
-package com.gmakris.gameshop.gateway.service.auth;
+package com.gmakris.gameshop.gateway.service.crud.auth;
 
 import com.gmakris.gameshop.gateway.entity.model.auth.Role;
 import com.gmakris.gameshop.gateway.repository.auth.RoleRepository;
