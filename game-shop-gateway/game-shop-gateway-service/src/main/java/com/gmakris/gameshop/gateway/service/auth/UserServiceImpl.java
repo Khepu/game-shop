@@ -2,7 +2,7 @@ package com.gmakris.gameshop.gateway.service.auth;
 
 import java.util.List;
 import com.gmakris.gameshop.gateway.entity.model.auth.User;
-import com.gmakris.gameshop.gateway.repository.UserRepository;
+import com.gmakris.gameshop.gateway.repository.auth.UserRepository;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,15 +12,21 @@ import reactor.core.publisher.Mono;
 @Service
 public class UserServiceImpl implements UserService, ReactiveUserDetailsService {
 
+    private final RoleService roleService;
     private final UserRepository repository;
 
-    public UserServiceImpl(final UserRepository repository) {
+    public UserServiceImpl(
+        final RoleService roleService,
+        final UserRepository repository
+    ) {
+        this.roleService = roleService;
         this.repository = repository;
     }
 
     @Override
     public Mono<User> save(final User user) {
-        return repository.save(user);
+        return repository.save(user)
+            .;
     }
 
     @Override

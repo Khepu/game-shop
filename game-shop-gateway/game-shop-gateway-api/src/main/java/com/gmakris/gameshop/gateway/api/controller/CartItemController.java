@@ -4,6 +4,7 @@ import static com.gmakris.gameshop.gateway.entity.model.CartItemOperation.ADD;
 import static com.gmakris.gameshop.gateway.entity.model.CartItemOperation.REMOVE;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.web.reactive.function.server.RequestPredicates.DELETE;
 import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
 import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
@@ -64,7 +65,7 @@ public class CartItemController extends AuthenticatedController implements Gener
                 .bodyValue(throwable.getMessage()));
     }
 
-    private Mono<ServerResponse> addCartItem(
+    private Mono<CartItem> addCartItem(
         final ServerRequest serverRequest,
         final CartItemOperation cartItemOperation
     ) {
@@ -77,7 +78,11 @@ public class CartItemController extends AuthenticatedController implements Gener
                     userId,
                     null,
                     cartItemOperation)))
-            .flatMap(cartItemService::save)
+            .flatMap(cartItemService::save);
+    }
+
+    private Mono<ServerResponse> addToCart(final ServerRequest serverRequest) {
+        return addCartItem(serverRequest, ADD)
             .flatMap(__ -> ServerResponse
                 .ok()
                 .build())
@@ -87,18 +92,21 @@ public class CartItemController extends AuthenticatedController implements Gener
                 .bodyValue(throwable.getMessage()));
     }
 
-    private Mono<ServerResponse> addToCart(final ServerRequest serverRequest) {
-        return addCartItem(serverRequest, ADD);
-    }
-
     private Mono<ServerResponse> removeFromCart(final ServerRequest serverRequest) {
-        return addCartItem(serverRequest, REMOVE);
+        return addCartItem(serverRequest, REMOVE)
+            .flatMap(__ -> ServerResponse
+                .noContent()
+                .build())
+            .onErrorResume(throwable -> ServerResponse
+                .status(INTERNAL_SERVER_ERROR)
+                .contentType(APPLICATION_JSON)
+                .bodyValue(throwable.getMessage()));
     }
 
     @Override
     public RouterFunction<ServerResponse> routes() {
         return route(GET("/cart"), this::showCart)
-            .and(route(POST("/cart/{gameId}/add"), this::addToCart))
-            .and(route(POST("/cart/{gameId}/remove"), this::removeFromCart));
+            .and(route(POST("/cart/{gameId}"), this::addToCart))
+            .and(route(DELETE("/cart/{gameId}"), this::removeFromCart));
     }
 }
