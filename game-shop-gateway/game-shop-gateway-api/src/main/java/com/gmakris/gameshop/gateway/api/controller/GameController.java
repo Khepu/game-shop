@@ -52,21 +52,6 @@ public class GameController extends AuthenticatedController implements GenericCo
         this.apiProperties = apiProperties;
     }
 
-    private Mono<ServerResponse> findAllOwned(final ServerRequest serverRequest) {
-        return getUserId(serverRequest)
-            .flatMapMany(gameService::findAllOwnedByUserId)
-            .map(gameMapper::to)
-            .collectList()
-            .flatMap(games -> ServerResponse
-                .ok()
-                .contentType(APPLICATION_JSON)
-                .bodyValue(games))
-            .onErrorResume(throwable -> ServerResponse
-                .status(INTERNAL_SERVER_ERROR)
-                .contentType(APPLICATION_JSON)
-                .bodyValue(throwable.getMessage()));
-    }
-
     private Mono<ServerResponse> findAllPaginated(final ServerRequest serverRequest) {
         return Mono.zip(
                 ParseUtil.toInteger(serverRequest.queryParam("page"))
@@ -119,8 +104,7 @@ public class GameController extends AuthenticatedController implements GenericCo
 
     @Override
     public RouterFunction<ServerResponse> routes() {
-        return route(GET("/games/all"), this::findAllPaginated)
-            .and(route(POST("/games/all"), this::search))
-            .and(route(GET("/games/owned"), this::findAllOwned));
+        return route(GET("/games"), this::findAllPaginated)
+            .and(route(POST("/games"), this::search));
     }
 }
