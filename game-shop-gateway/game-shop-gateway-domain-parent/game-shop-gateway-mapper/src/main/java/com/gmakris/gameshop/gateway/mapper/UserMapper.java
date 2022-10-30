@@ -1,7 +1,7 @@
 package com.gmakris.gameshop.gateway.mapper;
 
 import java.time.LocalDateTime;
-import com.gmakris.gameshop.gateway.entity.model.User;
+import com.gmakris.gameshop.gateway.entity.model.auth.User;
 import com.gmakris.gameshop.sdk.dto.NewUserDto;
 import org.springframework.stereotype.Component;
 

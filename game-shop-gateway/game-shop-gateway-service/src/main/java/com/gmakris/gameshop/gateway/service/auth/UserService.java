@@ -1,6 +1,6 @@
 package com.gmakris.gameshop.gateway.service.auth;
 
-import com.gmakris.gameshop.gateway.entity.model.User;
+import com.gmakris.gameshop.gateway.entity.model.auth.User;
 import reactor.core.publisher.Mono;
 
 public interface UserService {
