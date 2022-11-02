@@ -38,10 +38,11 @@ public class GameServiceImpl extends AbstractCrudService<Game> implements GameSe
     }
 
     @Override
-    public Flux<Game> findPricedGamesByQuery(
+    public Flux<Game> findAllByQuery(
         final String query,
-        final int limit
+        final int page,
+        final int size
     ) {
-        return repository.findPricedGamesByQuery(query, limit);
+        return repository.findAllByQuery(query, (page - 1) * size, size);
     }
 }
