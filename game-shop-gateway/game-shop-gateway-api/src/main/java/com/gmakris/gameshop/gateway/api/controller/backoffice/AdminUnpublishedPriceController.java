@@ -9,7 +9,6 @@ import static org.springframework.web.reactive.function.server.RequestPredicates
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 import com.gmakris.gameshop.gateway.api.ApiProperties;
 import com.gmakris.gameshop.gateway.api.controller.AuthenticatedController;
 import com.gmakris.gameshop.gateway.api.controller.GenericController;
@@ -77,7 +76,7 @@ public class AdminUnpublishedPriceController extends AuthenticatedController imp
 
     private Mono<ServerResponse> findOneByGame(final ServerRequest serverRequest) {
         return getUserId(serverRequest)
-            .flatMap(userId -> Mono.fromCallable(() -> UUID.fromString(serverRequest.pathVariable("gameId")))
+            .flatMap(userId -> ParseUtil.toUUID(serverRequest.pathVariable("gameId"))
                 .flatMap(gameId -> unpublishedPriceService.findOneByUserIdAndGameId(userId, gameId)))
             .flatMap(unpublishedPrice -> ServerResponse
                 .ok()
@@ -91,7 +90,7 @@ public class AdminUnpublishedPriceController extends AuthenticatedController imp
 
     private Mono<ServerResponse> createUnpublishedPrice(final ServerRequest serverRequest) {
         return getUserId(serverRequest)
-            .flatMap(userId -> Mono.fromCallable(() -> UUID.fromString(serverRequest.pathVariable("gameId")))
+            .flatMap(userId -> ParseUtil.toUUID(serverRequest.pathVariable("gameId"))
                 .zipWith(serverRequest.bodyToMono(BigDecimal.class))
                 .map(gameIdAndValue -> new UnpublishedPrice(
                     null,

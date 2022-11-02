@@ -5,9 +5,9 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
-import java.util.UUID;
 import com.gmakris.gameshop.gateway.api.controller.AuthenticatedController;
 import com.gmakris.gameshop.gateway.api.controller.GenericController;
+import com.gmakris.gameshop.gateway.api.util.ParseUtil;
 import com.gmakris.gameshop.gateway.mapper.PriceMapper;
 import com.gmakris.gameshop.gateway.service.crud.auth.UserService;
 import com.gmakris.gameshop.gateway.service.crud.backoffice.PublicationService;
@@ -35,8 +35,7 @@ public class AdminPriceController extends AuthenticatedController implements Gen
 
     private Mono<ServerResponse> publishPrice(final ServerRequest serverRequest) {
         return getUserId(serverRequest)
-            .flatMap(userId -> Mono
-                .fromCallable(() -> UUID.fromString(serverRequest.pathVariable("unpublishedPriceId")))
+            .flatMap(userId -> ParseUtil.toUUID(serverRequest.pathVariable("unpublishedPriceId"))
                 .flatMap(unpublishedPriceId -> publicationService.publish(unpublishedPriceId, userId)))
             .map(priceMapper::to)
             .flatMap(price -> ServerResponse

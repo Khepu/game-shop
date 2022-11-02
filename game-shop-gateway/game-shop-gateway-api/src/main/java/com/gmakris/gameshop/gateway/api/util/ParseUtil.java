@@ -1,6 +1,7 @@
 package com.gmakris.gameshop.gateway.api.util;
 
 import java.util.Optional;
+import java.util.UUID;
 import reactor.core.publisher.Mono;
 
 public final class ParseUtil {
@@ -14,5 +15,9 @@ public final class ParseUtil {
                     return Mono.error(e);
                 }
             });
+    }
+
+    public static Mono<UUID> toUUID(final String pathVariable) {
+        return Mono.fromCallable(() -> UUID.fromString(pathVariable));
     }
 }

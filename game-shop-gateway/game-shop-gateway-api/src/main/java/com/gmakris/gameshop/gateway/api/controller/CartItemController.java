@@ -9,15 +9,15 @@ import static org.springframework.web.reactive.function.server.RequestPredicates
 import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
-import java.util.UUID;
+import com.gmakris.gameshop.gateway.api.util.ParseUtil;
 import com.gmakris.gameshop.gateway.dto.PricedGameDto;
 import com.gmakris.gameshop.gateway.entity.model.CartItem;
 import com.gmakris.gameshop.gateway.entity.model.CartItemOperation;
 import com.gmakris.gameshop.gateway.mapper.GameMapper;
 import com.gmakris.gameshop.gateway.mapper.PriceMapper;
-import com.gmakris.gameshop.gateway.service.crud.auth.UserService;
 import com.gmakris.gameshop.gateway.service.crud.CartItemService;
 import com.gmakris.gameshop.gateway.service.crud.PriceService;
+import com.gmakris.gameshop.gateway.service.crud.auth.UserService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -70,8 +70,7 @@ public class CartItemController extends AuthenticatedController implements Gener
         final CartItemOperation cartItemOperation
     ) {
         return getUserId(serverRequest)
-            .flatMap(userId -> Mono.fromCallable(() ->
-                    UUID.fromString(serverRequest.pathVariable("gameId")))
+            .flatMap(userId -> ParseUtil.toUUID(serverRequest.pathVariable("gameId"))
                 .map(gameId -> new CartItem(
                     null,
                     gameId,

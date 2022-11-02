@@ -13,4 +13,6 @@ public interface GameService extends GenericCrudService<Game> {
     Flux<Game> findAllPaginated(int page, int size);
 
     Flux<Game> findAllByQuery(String query, int page, int size);
+
+    Mono<Game> findOne(UUID id);
 }

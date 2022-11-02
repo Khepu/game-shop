@@ -45,4 +45,9 @@ public class GameServiceImpl extends AbstractCrudService<Game> implements GameSe
     ) {
         return repository.findAllByQuery(query, (page - 1) * size, size);
     }
+
+    @Override
+    public Mono<Game> findOne(final UUID id) {
+        return repository.findOne(id);
+    }
 }

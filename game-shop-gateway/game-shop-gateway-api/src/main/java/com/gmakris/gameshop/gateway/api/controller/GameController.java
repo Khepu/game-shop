@@ -95,8 +95,26 @@ public class GameController extends AuthenticatedController implements GenericCo
                     pageAndSize.getT2()));
     }
 
+    private Mono<ServerResponse> findOne(final ServerRequest serverRequest) {
+        return ParseUtil.toUUID(serverRequest.pathVariable("gameId"))
+            .flatMap(gameService::findOne)
+            .flatMap(priceService::toPricedGame)
+            .map(priceAndGame -> new PricedGameDto(
+                gameMapper.to(priceAndGame.getT2()),
+                priceMapper.to(priceAndGame.getT1())))
+            .flatMap(pricedGame -> ServerResponse
+                .ok()
+                .contentType(APPLICATION_JSON)
+                .bodyValue(pricedGame))
+            .onErrorResume(throwable -> ServerResponse
+                .status(INTERNAL_SERVER_ERROR)
+                .contentType(APPLICATION_JSON)
+                .bodyValue(throwable.getMessage()));
+    }
+
     @Override
     public RouterFunction<ServerResponse> routes() {
-        return route(GET("/games"), this::findAllPaginated);
+        return route(GET("/games"), this::findAllPaginated)
+            .and(route(GET("/games/{gameId}"), this::findOne));
     }
 }

@@ -6,6 +6,7 @@ import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Repository
 public interface GameRepository extends GenericRepository<Game> {
@@ -52,6 +53,24 @@ public interface GameRepository extends GenericRepository<Game> {
         @Param("query") String query,
         @Param("offset") int offset,
         @Param("limit") int limit);
+
+    @Query("""
+    with games_with_status as (select distinct on (g.id)
+                                   g.id as id,
+                                   g.name as name,
+                                   g.created_at as created_at,
+                                   g.name_embeddings as name_embeddings,
+                                   gs.status as status
+                               from games g
+                                   inner join game_states gs on gs.game_id = g.id
+                               where g.id = :id
+                               order by g.id, gs.created_at desc)
+    select id, name, created_at
+    from games_with_status
+    where status == 'AVAILABLE'
+    limit 1
+    """)
+    Mono<Game> findOne(@Param("id") UUID id);
 
     @Query("""
     select g.id, g.name, g.created_at

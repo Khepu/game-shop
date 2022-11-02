@@ -9,9 +9,9 @@ import static org.springframework.web.reactive.function.server.RequestPredicates
 import static org.springframework.web.reactive.function.server.RequestPredicates.PUT;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
-import java.util.UUID;
 import com.gmakris.gameshop.gateway.api.controller.AuthenticatedController;
 import com.gmakris.gameshop.gateway.api.controller.GenericController;
+import com.gmakris.gameshop.gateway.api.util.ParseUtil;
 import com.gmakris.gameshop.gateway.entity.model.Game;
 import com.gmakris.gameshop.gateway.entity.model.backoffice.GameState;
 import com.gmakris.gameshop.gateway.entity.model.backoffice.GameStatus;
@@ -73,8 +73,7 @@ public class AdminGameController extends AuthenticatedController implements Gene
         final GameStatus gameStatus
     ) {
         return getUserId(serverRequest)
-            .flatMap(userId -> Mono.justOrEmpty(serverRequest.pathVariable("gameId"))
-                .flatMap(gameIdString -> Mono.fromCallable(() -> UUID.fromString(gameIdString)))
+            .flatMap(userId -> ParseUtil.toUUID(serverRequest.pathVariable("gameId"))
                 .map(gameId -> new GameState(
                     null,
                     gameId,
@@ -85,11 +84,7 @@ public class AdminGameController extends AuthenticatedController implements Gene
     }
 
     private Mono<ServerResponse> setGameAvailable(final ServerRequest serverRequest) {
-        return getUserId(serverRequest)
-            .flatMap(userId -> gameStateService.changeGameStatus(
-                userId,
-                serverRequest.pathVariable("gameId"),
-                AVAILABLE))
+        return changeGameStatus(serverRequest, AVAILABLE)
             .flatMap(__ -> ServerResponse
                 .ok()
                 .build())
@@ -100,11 +95,7 @@ public class AdminGameController extends AuthenticatedController implements Gene
     }
 
     private Mono<ServerResponse> setGameUnavailable(final ServerRequest serverRequest) {
-        return getUserId(serverRequest)
-            .flatMap(userId -> gameStateService.changeGameStatus(
-                userId,
-                serverRequest.pathVariable("gameId"),
-                UNAVAILABLE))
+        return changeGameStatus(serverRequest, UNAVAILABLE)
             .flatMap(__ -> ServerResponse
                 .noContent()
                 .build())
