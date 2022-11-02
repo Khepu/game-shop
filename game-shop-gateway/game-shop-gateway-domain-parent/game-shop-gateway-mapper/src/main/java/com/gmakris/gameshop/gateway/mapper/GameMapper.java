@@ -1,7 +1,7 @@
 package com.gmakris.gameshop.gateway.mapper;
 
+import com.gmakris.gameshop.gateway.dto.GameDto;
 import com.gmakris.gameshop.gateway.entity.model.Game;
-import com.gmakris.gameshop.sdk.dto.GameDto;
 import org.springframework.stereotype.Component;
 
 @Component

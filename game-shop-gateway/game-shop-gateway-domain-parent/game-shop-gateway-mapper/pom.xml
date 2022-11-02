@@ -19,7 +19,7 @@
         </dependency>
         <dependency>
             <groupId>com.gmakris</groupId>
-            <artifactId>game-shop-sdk-dto</artifactId>
+            <artifactId>game-shop-gateway-dto</artifactId>
         </dependency>
     </dependencies>
 </project>

@@ -9,13 +9,13 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
 
 import com.gmakris.gameshop.gateway.api.ApiProperties;
 import com.gmakris.gameshop.gateway.api.util.ParseUtil;
+import com.gmakris.gameshop.gateway.dto.PricedGameDto;
 import com.gmakris.gameshop.gateway.entity.model.Game;
 import com.gmakris.gameshop.gateway.mapper.GameMapper;
 import com.gmakris.gameshop.gateway.mapper.PriceMapper;
 import com.gmakris.gameshop.gateway.service.crud.GameService;
 import com.gmakris.gameshop.gateway.service.crud.PriceService;
 import com.gmakris.gameshop.gateway.service.crud.auth.UserService;
-import com.gmakris.gameshop.sdk.dto.PricedGameDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.RouterFunction;

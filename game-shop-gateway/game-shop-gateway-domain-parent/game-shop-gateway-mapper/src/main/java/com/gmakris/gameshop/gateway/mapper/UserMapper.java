@@ -1,10 +1,14 @@
 package com.gmakris.gameshop.gateway.mapper;
 
 import java.time.LocalDateTime;
+import com.gmakris.gameshop.gateway.dto.NewUserDto;
 import com.gmakris.gameshop.gateway.entity.model.auth.User;
-import com.gmakris.gameshop.sdk.dto.NewUserDto;
 import org.springframework.stereotype.Component;
 
+/**
+ * This mapper does not conform to the {@link GenericMapper} interface
+ * as it would be unwanted to expose the user's details outside the application's context.
+ */
 @Component
 public class UserMapper {
 
