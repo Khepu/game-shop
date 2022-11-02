@@ -33,5 +33,5 @@ ALTER TABLE user_roles
 
 -- default roles
 INSERT INTO roles (name)
-VALUES ('USER'),
-       ('ADMIN');
+VALUES ('ROLE_USER'),
+       ('ROLE_ADMIN');
