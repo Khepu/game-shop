@@ -5,23 +5,25 @@ import static java.lang.Math.min;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
-import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 import com.gmakris.gameshop.gateway.api.ApiProperties;
 import com.gmakris.gameshop.gateway.api.util.ParseUtil;
+import com.gmakris.gameshop.gateway.entity.model.Game;
 import com.gmakris.gameshop.gateway.mapper.GameMapper;
 import com.gmakris.gameshop.gateway.mapper.PriceMapper;
-import com.gmakris.gameshop.gateway.service.crud.auth.UserService;
 import com.gmakris.gameshop.gateway.service.crud.GameService;
 import com.gmakris.gameshop.gateway.service.crud.PriceService;
+import com.gmakris.gameshop.gateway.service.crud.auth.UserService;
 import com.gmakris.gameshop.sdk.dto.PricedGameDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
 
 @Slf4j
 @Component
@@ -62,9 +64,7 @@ public class GameController extends AuthenticatedController implements GenericCo
                     .doOnError(throwable -> log.error("Error parsing page size!"))
                     .onErrorMap(throwable -> new RuntimeException("Could not parse query parameter 'size'!"))
                     .map(size -> min(apiProperties.getMaxPageSize(), size)))
-            .flatMapMany(pageAndSize -> gameService.findAllPaginated(
-                pageAndSize.getT1(),
-                pageAndSize.getT2()))
+            .flatMapMany(pageAndSize -> findByQueryOrAll(serverRequest, pageAndSize))
             .flatMap(priceService::toPricedGame)
             .map(priceAndGame -> new PricedGameDto(
                 gameMapper.to(priceAndGame.getT2()),
@@ -80,31 +80,23 @@ public class GameController extends AuthenticatedController implements GenericCo
                 .bodyValue(throwable.getMessage()));
     }
 
-    private Mono<ServerResponse> search(final ServerRequest serverRequest) {
-        return serverRequest.bodyToMono(String.class)
-            .flatMapMany(query -> gameService.findPricedGamesByQuery(
+    private Flux<Game> findByQueryOrAll(
+        final ServerRequest serverRequest,
+        final Tuple2<Integer, Integer> pageAndSize
+    ) {
+        return Mono.justOrEmpty(serverRequest.queryParam("q"))
+            .flatMapMany(query -> gameService.findAllByQuery(
                 query,
-                apiProperties.getDefaultPageSize()))
-            .flatMap(priceService::toPricedGame)
-            .map(priceAndGame -> new PricedGameDto(
-                gameMapper.to(priceAndGame.getT2()),
-                priceMapper.to(priceAndGame.getT1())))
-            .collectList()
-            .flatMap(pricedGames -> ServerResponse
-                .ok()
-                .contentType(APPLICATION_JSON)
-                .bodyValue(pricedGames))
-            .doOnError(throwable -> log.error("Error while searching for games by query!", throwable))
-            .onErrorMap(throwable -> new RuntimeException("Invalid query!"))
-            .onErrorResume(throwable -> ServerResponse
-                .status(INTERNAL_SERVER_ERROR)
-                .contentType(APPLICATION_JSON)
-                .bodyValue(throwable.getMessage()));
+                pageAndSize.getT1(),
+                pageAndSize.getT2()))
+            .switchIfEmpty(
+                gameService.findAllPaginated(
+                    pageAndSize.getT1(),
+                    pageAndSize.getT2()));
     }
 
     @Override
     public RouterFunction<ServerResponse> routes() {
-        return route(GET("/games"), this::findAllPaginated)
-            .and(route(POST("/games"), this::search));
+        return route(GET("/games"), this::findAllPaginated);
     }
 }
