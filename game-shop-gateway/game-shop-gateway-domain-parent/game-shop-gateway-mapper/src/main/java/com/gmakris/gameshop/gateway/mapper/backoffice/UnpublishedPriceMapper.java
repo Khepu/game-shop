@@ -1,6 +1,6 @@
 package com.gmakris.gameshop.gateway.mapper.backoffice;
 
-import com.gmakris.gameshop.gateway.dto.UnpublishedPriceDto;
+import com.gmakris.gameshop.gateway.dto.backoffice.UnpublishedPriceDto;
 import com.gmakris.gameshop.gateway.entity.model.backoffice.UnpublishedPrice;
 import com.gmakris.gameshop.gateway.mapper.GenericMapper;
 import org.springframework.stereotype.Component;
