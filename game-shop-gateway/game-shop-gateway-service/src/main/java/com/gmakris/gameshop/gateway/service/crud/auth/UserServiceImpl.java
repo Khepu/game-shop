@@ -1,5 +1,6 @@
 package com.gmakris.gameshop.gateway.service.crud.auth;
 
+import java.time.LocalDateTime;
 import com.gmakris.gameshop.gateway.entity.model.auth.User;
 import com.gmakris.gameshop.gateway.entity.model.auth.UserRole;
 import com.gmakris.gameshop.gateway.repository.auth.UserRepository;
@@ -29,8 +30,8 @@ public class UserServiceImpl implements UserService, ReactiveUserDetailsService 
     @Override
     public Mono<User> save(final User user) {
         return repository.save(user)
-            .flatMap(persistedUser -> roleService.findByName("USER")
-                .map(role -> new UserRole(null, user.id(), role.id(), null))
+            .flatMap(persistedUser -> roleService.findByName("ROLE_USER")
+                .map(role -> new UserRole(null, persistedUser.id(), role.id(), LocalDateTime.now()))
                 .flatMap(userRoleService::save)
                 .thenReturn(persistedUser));
     }

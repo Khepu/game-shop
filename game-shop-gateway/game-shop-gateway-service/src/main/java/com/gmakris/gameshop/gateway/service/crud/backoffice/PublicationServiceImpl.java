@@ -1,5 +1,6 @@
 package com.gmakris.gameshop.gateway.service.crud.backoffice;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 import com.gmakris.gameshop.gateway.entity.model.Price;
 import com.gmakris.gameshop.gateway.entity.model.backoffice.Publication;
@@ -38,7 +39,7 @@ public class PublicationServiceImpl extends AbstractCrudService<Publication> imp
             .map(unpublishedPrice -> new Price(
                 null,
                 unpublishedPrice.gameId(),
-                null,
+                LocalDateTime.now(),
                 unpublishedPrice.value()))
             .flatMap(priceService::save)
             .flatMap(publishedPrice -> save(
@@ -46,7 +47,7 @@ public class PublicationServiceImpl extends AbstractCrudService<Publication> imp
                     null,
                     unpublishedPriceId,
                     publishedPrice.id(),
-                    null))
+                    LocalDateTime.now()))
                 .thenReturn(publishedPrice));
     }
 }

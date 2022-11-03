@@ -12,6 +12,6 @@ public record GameState(
     UUID gameId,
     UUID userId,
     LocalDateTime createdAt,
-    GameStatus status
+    GameStatus gameStatus
 ) implements GenericEntity {
 }

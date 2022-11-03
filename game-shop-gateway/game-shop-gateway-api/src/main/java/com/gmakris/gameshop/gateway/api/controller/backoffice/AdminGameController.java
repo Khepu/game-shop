@@ -9,6 +9,7 @@ import static org.springframework.web.reactive.function.server.RequestPredicates
 import static org.springframework.web.reactive.function.server.RequestPredicates.PUT;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
+import java.time.LocalDateTime;
 import com.gmakris.gameshop.gateway.api.controller.AuthenticatedController;
 import com.gmakris.gameshop.gateway.api.controller.GenericController;
 import com.gmakris.gameshop.gateway.api.util.ParseUtil;
@@ -19,12 +20,14 @@ import com.gmakris.gameshop.gateway.mapper.GameMapper;
 import com.gmakris.gameshop.gateway.service.crud.GameService;
 import com.gmakris.gameshop.gateway.service.crud.auth.UserService;
 import com.gmakris.gameshop.gateway.service.crud.backoffice.GameStateService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 
+@Slf4j
 @Component
 public class AdminGameController extends AuthenticatedController implements GenericController {
 
@@ -48,16 +51,23 @@ public class AdminGameController extends AuthenticatedController implements Gene
     private Mono<ServerResponse> createGame(final ServerRequest serverRequest) {
         return getUserId(serverRequest)
             .flatMap(userId -> serverRequest.bodyToMono(String.class)
-                .map(newGameName -> new Game(null, newGameName, null))
-                .flatMap(gameService::save)
-                .flatMap(persistedGame -> gameStateService.save(
-                        new GameState(
+                .flatMap(newGameName -> gameService.save(
+                        new Game(
                             null,
-                            persistedGame.id(),
-                            userId,
-                            null,
-                            AVAILABLE))
-                    .thenReturn(persistedGame)))
+                            newGameName,
+                            LocalDateTime.now()))
+                    .flatMap(persistedGame -> gameStateService.save(
+                            new GameState(
+                                null,
+                                persistedGame.id(),
+                                userId,
+                                LocalDateTime.now(),
+                                AVAILABLE))
+                        .thenReturn(persistedGame))
+                    .doOnError(throwable -> log.error("Could not create game '{}' requested by user '{}'",
+                        newGameName,
+                        userId,
+                        throwable))))
             .map(gameMapper::to)
             .flatMap(persistedGame -> ServerResponse
                 .ok()
@@ -78,9 +88,14 @@ public class AdminGameController extends AuthenticatedController implements Gene
                     null,
                     gameId,
                     userId,
-                    null,
-                    gameStatus)))
-            .flatMap(gameStateService::save);
+                    LocalDateTime.now(),
+                    gameStatus))
+                .flatMap(gameStateService::save)
+                .doOnError(throwable -> log.error("Could not change game '{}' to status '{}' by user '{}'!",
+                    serverRequest.pathVariable("gameId"),
+                    gameStatus,
+                    userId,
+                    throwable)));
     }
 
     private Mono<ServerResponse> setGameAvailable(final ServerRequest serverRequest) {
@@ -107,8 +122,8 @@ public class AdminGameController extends AuthenticatedController implements Gene
 
     @Override
     public RouterFunction<ServerResponse> routes() {
-        return route(POST("/admin/game"), this::createGame)
-            .and(route(PUT("/admin/game/{gameId}"), this::setGameAvailable))
-            .and(route(DELETE("/admin/game/{gameId}"), this::setGameUnavailable));
+        return route(POST("/admin/games"), this::createGame)
+            .and(route(PUT("/admin/games/{gameId}"), this::setGameAvailable))
+            .and(route(DELETE("/admin/games/{gameId}"), this::setGameUnavailable));
     }
 }

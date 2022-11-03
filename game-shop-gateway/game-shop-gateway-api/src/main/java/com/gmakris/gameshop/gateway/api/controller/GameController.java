@@ -15,7 +15,6 @@ import com.gmakris.gameshop.gateway.mapper.GameMapper;
 import com.gmakris.gameshop.gateway.mapper.PriceMapper;
 import com.gmakris.gameshop.gateway.service.crud.GameService;
 import com.gmakris.gameshop.gateway.service.crud.PriceService;
-import com.gmakris.gameshop.gateway.service.crud.auth.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.RouterFunction;
@@ -27,7 +26,7 @@ import reactor.util.function.Tuple2;
 
 @Slf4j
 @Component
-public class GameController extends AuthenticatedController implements GenericController {
+public class GameController implements GenericController {
 
     private static final int FIRST_PAGE = 1;
 
@@ -40,13 +39,10 @@ public class GameController extends AuthenticatedController implements GenericCo
     public GameController(
         final GameMapper gameMapper,
         final PriceMapper priceMapper,
-        final UserService userService,
         final GameService gameService,
         final PriceService priceService,
         final ApiProperties apiProperties
     ) {
-        super(userService);
-
         this.gameMapper = gameMapper;
         this.priceMapper = priceMapper;
         this.gameService = gameService;
@@ -59,11 +55,13 @@ public class GameController extends AuthenticatedController implements GenericCo
                 ParseUtil.toInteger(serverRequest.queryParam("page"))
                     .doOnError(throwable -> log.error("Error parsing page number!"))
                     .onErrorMap(throwable -> new RuntimeException("Could not parse query parameter 'page'!"))
-                    .map(page -> max(FIRST_PAGE, page)),
+                    .map(page -> max(FIRST_PAGE, page))
+                    .switchIfEmpty(Mono.just(FIRST_PAGE)),
                 ParseUtil.toInteger(serverRequest.queryParam("size"))
                     .doOnError(throwable -> log.error("Error parsing page size!"))
                     .onErrorMap(throwable -> new RuntimeException("Could not parse query parameter 'size'!"))
-                    .map(size -> min(apiProperties.getMaxPageSize(), size)))
+                    .map(size -> min(apiProperties.getMaxPageSize(), size))
+                    .switchIfEmpty(Mono.just(apiProperties.getDefaultPageSize())))
             .flatMapMany(pageAndSize -> findByQueryOrAll(serverRequest, pageAndSize))
             .flatMap(priceService::toPricedGame)
             .map(priceAndGame -> new PricedGameDto(
@@ -74,6 +72,11 @@ public class GameController extends AuthenticatedController implements GenericCo
                 .ok()
                 .contentType(APPLICATION_JSON)
                 .bodyValue(pricedGames))
+            .doOnError(throwable -> log.error("Could not fetch all with parameters [size: '{}', page: '{}', q: '{}']!",
+                serverRequest.queryParam("size").orElse(null),
+                serverRequest.queryParam("page").orElse(null),
+                serverRequest.queryParam("q").orElse(null),
+                throwable))
             .onErrorResume(throwable -> ServerResponse
                 .status(INTERNAL_SERVER_ERROR)
                 .contentType(APPLICATION_JSON)
@@ -106,6 +109,9 @@ public class GameController extends AuthenticatedController implements GenericCo
                 .ok()
                 .contentType(APPLICATION_JSON)
                 .bodyValue(pricedGame))
+            .doOnError(throwable -> log.error("Could not fetch game with id '{}'!",
+                serverRequest.pathVariable("gameId"),
+                throwable))
             .onErrorResume(throwable -> ServerResponse
                 .status(INTERNAL_SERVER_ERROR)
                 .contentType(APPLICATION_JSON)

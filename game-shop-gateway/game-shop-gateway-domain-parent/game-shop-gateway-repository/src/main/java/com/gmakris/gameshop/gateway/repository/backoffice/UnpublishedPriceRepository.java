@@ -18,7 +18,7 @@ public interface UnpublishedPriceRepository extends GenericRepository<Unpublishe
         left outer join publications p on p.unpublished_price_id = up.id
     where user_id = :userId
         and p.id is null
-    order by game_id, created_at desc
+    order by game_id, up.created_at desc
     offset :offset
     limit :limit
     """)
@@ -33,14 +33,13 @@ public interface UnpublishedPriceRepository extends GenericRepository<Unpublishe
         left outer join publications p on p.unpublished_price_id = up.id
     where user_id = :userId
         and p.id is null
-        and p.game_id = :gameId
-    order by game_id, created_at desc
+        and up.game_id = :gameId
+    order by game_id, up.created_at desc
     limit 1
     """)
     Mono<UnpublishedPrice> findOneByUserIdAndGameId(
         @Param("userId") UUID userId,
         @Param("gameId") UUID gameId);
-
 
     @Query("""
     select *

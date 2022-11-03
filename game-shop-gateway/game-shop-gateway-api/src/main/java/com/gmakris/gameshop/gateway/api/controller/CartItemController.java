@@ -9,6 +9,7 @@ import static org.springframework.web.reactive.function.server.RequestPredicates
 import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
+import java.time.LocalDateTime;
 import com.gmakris.gameshop.gateway.api.util.ParseUtil;
 import com.gmakris.gameshop.gateway.dto.PricedGameDto;
 import com.gmakris.gameshop.gateway.entity.model.CartItem;
@@ -18,12 +19,14 @@ import com.gmakris.gameshop.gateway.mapper.PriceMapper;
 import com.gmakris.gameshop.gateway.service.crud.CartItemService;
 import com.gmakris.gameshop.gateway.service.crud.PriceService;
 import com.gmakris.gameshop.gateway.service.crud.auth.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 
+@Slf4j
 @Component
 public class CartItemController extends AuthenticatedController implements GenericController {
 
@@ -59,6 +62,7 @@ public class CartItemController extends AuthenticatedController implements Gener
                 .ok()
                 .contentType(APPLICATION_JSON)
                 .bodyValue(pricedGames))
+
             .onErrorResume(throwable -> ServerResponse
                 .status(INTERNAL_SERVER_ERROR)
                 .contentType(APPLICATION_JSON)
@@ -75,9 +79,14 @@ public class CartItemController extends AuthenticatedController implements Gener
                     null,
                     gameId,
                     userId,
-                    null,
-                    cartItemOperation)))
-            .flatMap(cartItemService::save);
+                    LocalDateTime.now(),
+                    cartItemOperation))
+                .flatMap(cartItemService::save)
+                .doOnError(throwable -> log.error("Could not process operation '{}' for game '{}' by user '{}'!",
+                    cartItemOperation,
+                    serverRequest.pathVariable("gameId"),
+                    userId,
+                    throwable)));
     }
 
     private Mono<ServerResponse> addToCart(final ServerRequest serverRequest) {

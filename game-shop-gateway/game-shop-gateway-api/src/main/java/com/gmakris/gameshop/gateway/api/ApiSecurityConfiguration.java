@@ -24,8 +24,8 @@ public class ApiSecurityConfiguration {
         return http
             .csrf().disable()
             .authorizeExchange()
-                .pathMatchers("/admin/").hasRole("ADMIN")
-                .pathMatchers("/auth/register").permitAll()
+                .pathMatchers("/admin/**").hasRole("ADMIN")
+                .pathMatchers("/auth/register", "/games", "/games/*").permitAll()
                 .anyExchange().authenticated()
             .and()
                 .httpBasic()

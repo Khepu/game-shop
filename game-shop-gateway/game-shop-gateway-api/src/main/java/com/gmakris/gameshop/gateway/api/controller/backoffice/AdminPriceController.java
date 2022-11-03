@@ -11,12 +11,14 @@ import com.gmakris.gameshop.gateway.api.util.ParseUtil;
 import com.gmakris.gameshop.gateway.mapper.PriceMapper;
 import com.gmakris.gameshop.gateway.service.crud.auth.UserService;
 import com.gmakris.gameshop.gateway.service.crud.backoffice.PublicationService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 
+@Slf4j
 @Component
 public class AdminPriceController extends AuthenticatedController implements GenericController {
 
@@ -36,7 +38,11 @@ public class AdminPriceController extends AuthenticatedController implements Gen
     private Mono<ServerResponse> publishPrice(final ServerRequest serverRequest) {
         return getUserId(serverRequest)
             .flatMap(userId -> ParseUtil.toUUID(serverRequest.pathVariable("unpublishedPriceId"))
-                .flatMap(unpublishedPriceId -> publicationService.publish(unpublishedPriceId, userId)))
+                .flatMap(unpublishedPriceId -> publicationService.publish(unpublishedPriceId, userId))
+                .doOnError(throwable -> log.error("Could not publish unpublished-price '{}' by user '{}'!",
+                    serverRequest.pathVariable("unpublishedPriceId"),
+                    userId,
+                    throwable)))
             .map(priceMapper::to)
             .flatMap(price -> ServerResponse
                 .ok()

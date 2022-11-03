@@ -15,14 +15,14 @@ public interface GameRepository extends GenericRepository<Game> {
     with games_with_status as (select distinct on (g.id)
                                    g.id as id,
                                    g.name as name,
-                                   g.created_at as created_at, 
-                                   gs.status as status
+                                   g.created_at as created_at,
+                                   gs.game_status as game_status
                                from games g
                                    inner join game_states gs on gs.game_id = g.id
                                order by g.id, gs.created_at desc)
     select id, name, created_at
     from games_with_status
-    where status == 'AVAILABLE'
+    where game_status = 'AVAILABLE'
     order by created_at desc
     offset :offset
     limit :limit
@@ -37,14 +37,14 @@ public interface GameRepository extends GenericRepository<Game> {
                                    g.name as name,
                                    g.created_at as created_at,
                                    g.name_embeddings as name_embeddings,
-                                   gs.status as status
+                                   gs.game_status as game_status
                                from games g
                                    inner join game_states gs on gs.game_id = g.id
                                order by g.id, gs.created_at desc)
     select id, name, created_at
     from games_with_status
     where websearch_to_tsquery('english', :query) @@ name_embeddings
-        and status == 'AVAILABLE'
+        and game_status = 'AVAILABLE'
     order by created_at desc
     offset :offset
     limit :limit
@@ -60,14 +60,14 @@ public interface GameRepository extends GenericRepository<Game> {
                                    g.name as name,
                                    g.created_at as created_at,
                                    g.name_embeddings as name_embeddings,
-                                   gs.status as status
+                                   gs.game_status as game_status
                                from games g
                                    inner join game_states gs on gs.game_id = g.id
                                where g.id = :id
                                order by g.id, gs.created_at desc)
     select id, name, created_at
     from games_with_status
-    where status == 'AVAILABLE'
+    where game_status = 'AVAILABLE'
     limit 1
     """)
     Mono<Game> findOne(@Param("id") UUID id);

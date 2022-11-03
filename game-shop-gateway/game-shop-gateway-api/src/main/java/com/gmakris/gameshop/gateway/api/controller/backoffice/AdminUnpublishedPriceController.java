@@ -9,6 +9,7 @@ import static org.springframework.web.reactive.function.server.RequestPredicates
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import com.gmakris.gameshop.gateway.api.ApiProperties;
 import com.gmakris.gameshop.gateway.api.controller.AuthenticatedController;
 import com.gmakris.gameshop.gateway.api.controller.GenericController;
@@ -52,26 +53,33 @@ public class AdminUnpublishedPriceController extends AuthenticatedController imp
                 ParseUtil.toInteger(serverRequest.queryParam("page"))
                     .doOnError(throwable -> log.error("Error parsing page number!"))
                     .onErrorMap(throwable -> new RuntimeException("Could not parse query parameter 'page'!"))
-                    .map(page -> max(FIRST_PAGE, page)),
+                    .map(page -> max(FIRST_PAGE, page))
+                    .switchIfEmpty(Mono.just(FIRST_PAGE)),
                 ParseUtil.toInteger(serverRequest.queryParam("size"))
                     .doOnError(throwable -> log.error("Error parsing page size!"))
                     .onErrorMap(throwable -> new RuntimeException("Could not parse query parameter 'size'!"))
-                    .map(size -> min(properties.getMaxPageSize(), size)))
-            .flatMapMany(pageAndSize -> getUserId(serverRequest)
+                    .map(size -> min(properties.getMaxPageSize(), size))
+                    .switchIfEmpty(Mono.just(properties.getDefaultPageSize())))
+            .flatMap(pageAndSize -> getUserId(serverRequest)
                 .flatMapMany(userId -> unpublishedPriceService.findAllByUserId(
-                    userId,
-                    pageAndSize.getT1(),
-                    pageAndSize.getT2())))
-            .map(unpublishedPriceMapper::to)
-            .collectList()
-            .flatMap(unpublishedPrices -> ServerResponse
-                .ok()
-                .contentType(APPLICATION_JSON)
-                .bodyValue(unpublishedPrices))
-            .onErrorResume(throwable -> ServerResponse
-                .status(INTERNAL_SERVER_ERROR)
-                .contentType(APPLICATION_JSON)
-                .bodyValue(throwable.getMessage()));
+                        userId,
+                        pageAndSize.getT1(),
+                        pageAndSize.getT2())
+                    .doOnError(throwable -> log.error("Could not fetch all with parameters [size: '{}', page: '{}'] by user '{}'!",
+                        serverRequest.queryParam("size").orElse(null),
+                        serverRequest.queryParam("page").orElse(null),
+                        userId,
+                        throwable)))
+                .map(unpublishedPriceMapper::to)
+                .collectList()
+                .flatMap(unpublishedPrices -> ServerResponse
+                    .ok()
+                    .contentType(APPLICATION_JSON)
+                    .bodyValue(unpublishedPrices))
+                .onErrorResume(throwable -> ServerResponse
+                    .status(INTERNAL_SERVER_ERROR)
+                    .contentType(APPLICATION_JSON)
+                    .bodyValue(throwable.getMessage())));
     }
 
     private Mono<ServerResponse> findOneByGame(final ServerRequest serverRequest) {
@@ -96,7 +104,7 @@ public class AdminUnpublishedPriceController extends AuthenticatedController imp
                     null,
                     gameIdAndValue.getT1(),
                     userId,
-                    null,
+                    LocalDateTime.now(),
                     gameIdAndValue.getT2())))
             .flatMap(unpublishedPriceService::save)
             .map(unpublishedPriceMapper::to)
@@ -112,8 +120,8 @@ public class AdminUnpublishedPriceController extends AuthenticatedController imp
 
     @Override
     public RouterFunction<ServerResponse> routes() {
-        return route(GET("/admin/unpublished-price"), this::findAllPaginated)
-            .and(route(GET("/admin/unpublished-price/{gameId}"), this::findOneByGame))
-            .and(route(POST("/admin/unpublished-price/{gameId}"), this::createUnpublishedPrice));
+        return route(GET("/admin/unpublished-prices"), this::findAllPaginated)
+            .and(route(GET("/admin/unpublished-prices/{gameId}"), this::findOneByGame))
+            .and(route(POST("/admin/unpublished-prices/{gameId}"), this::createUnpublishedPrice));
     }
 }

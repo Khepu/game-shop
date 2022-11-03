@@ -63,17 +63,20 @@ public class UserController extends AuthenticatedController implements GenericCo
 
     private Mono<ServerResponse> findAllOwned(final ServerRequest serverRequest) {
         return getUserId(serverRequest)
-            .flatMapMany(gameService::findAllOwnedByUserId)
-            .map(gameMapper::to)
-            .collectList()
-            .flatMap(games -> ServerResponse
-                .ok()
-                .contentType(APPLICATION_JSON)
-                .bodyValue(games))
-            .onErrorResume(throwable -> ServerResponse
-                .status(INTERNAL_SERVER_ERROR)
-                .contentType(APPLICATION_JSON)
-                .bodyValue(throwable.getMessage()));
+            .flatMap(userId -> gameService.findAllOwnedByUserId(userId)
+                .map(gameMapper::to)
+                .collectList()
+                .flatMap(games -> ServerResponse
+                    .ok()
+                    .contentType(APPLICATION_JSON)
+                    .bodyValue(games))
+                .doOnError(throwable -> log.error("Could not fetch owned games for user '{}'!",
+                    userId,
+                    throwable))
+                .onErrorResume(throwable -> ServerResponse
+                    .status(INTERNAL_SERVER_ERROR)
+                    .contentType(APPLICATION_JSON)
+                    .bodyValue(throwable.getMessage())));
     }
 
     @Override
